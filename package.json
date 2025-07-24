@@ -2,6 +2,7 @@
   "name": "flowagent",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -12,21 +13,26 @@
     "@notionhq/client": "^4.0.1",
     "axios": "^1.10.0",
     "googleapis": "^153.0.0",
+    "html-to-text": "^9.0.5",
     "langchain": "^0.3.30",
     "next": "15.4.1",
+    "next-auth": "^4.24.11",
     "openai": "^5.10.1",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.1.11",
+    "@types/html-to-text": "^9.0.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.21",
     "eslint": "^9",
     "eslint-config-next": "15.4.1",
-    "tailwindcss": "^4",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.11",
     "typescript": "^5"
   }
 }
