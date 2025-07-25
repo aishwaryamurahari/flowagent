@@ -52,7 +52,7 @@ export default function PushToNotionButton({
     <div className="mt-4">
       <button
         onClick={handlePush}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors dark:bg-blue-500 dark:hover:bg-blue-600"
         style={{
           padding: '8px 16px',
           backgroundColor: '#2563eb',
@@ -65,7 +65,7 @@ export default function PushToNotionButton({
       >
         Push to Notion
       </button>
-      {status && <p className="text-sm mt-2">{status}</p>}
+      {status && <p className="text-sm mt-2 text-gray-700 dark:text-gray-300">{status}</p>}
     </div>
   );
 }
