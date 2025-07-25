@@ -12,8 +12,33 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
     return <p className="text-red-600">You must be signed in.</p>;
   }
 
-  const emailBody = await fetchEmailBody(session.accessToken, params.id);
-  const agentResult = await runAgent(emailBody);
+  // fetchEmailBody now returns { summary, jobLinks }
+  const emailBodyResult = await fetchEmailBody(session.accessToken, params.id);
+  const agentResult = await runAgent(emailBodyResult.summary);
+
+  // Format the email content for better readability
+  const formatEmailContent = (content: string) => {
+    if (!content) return content;
+    // Split into paragraphs and format
+    const paragraphs = content.split('\n\n').filter(p => p.trim().length > 0);
+    return paragraphs.map((paragraph, index) => (
+      <p
+        key={index}
+        className="mb-4 leading-relaxed"
+        style={{
+          marginBottom: '16px',
+          lineHeight: '1.6'
+        }}
+      >
+        {paragraph.trim()}
+      </p>
+    ));
+  };
+
+  // Helper function to check if due date should be displayed
+  const shouldShowDueDate = (dueDate: string | undefined) => {
+    return dueDate && dueDate !== "" && dueDate !== "None" && dueDate !== "null";
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -36,11 +61,31 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
             fontSize: '14px',
             lineHeight: '1.6',
             wordWrap: 'break-word',
-            overflowWrap: 'break-word',
-            whiteSpace: 'pre-wrap'
+            overflowWrap: 'break-word'
           }}
         >
-          {emailBody}
+          {/* Show the summary as before */}
+          {formatEmailContent(emailBodyResult.summary)}
+          {/* Show clickable job links if present */}
+          {emailBodyResult.jobLinks && emailBodyResult.jobLinks.length > 0 && (
+            <div className="mt-4">
+              <h4 className="font-semibold mb-2 text-indigo-600">Job Links:</h4>
+              <ul className="list-disc pl-6">
+                {emailBodyResult.jobLinks.map((job, idx) => (
+                  <li key={idx} className="mb-2">
+                    <a
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline hover:text-blue-800"
+                    >
+                      {job.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
 
@@ -65,7 +110,7 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
           >
             {agentResult.task}
           </p>
-          {agentResult.dueDate && (
+          {shouldShowDueDate(agentResult.dueDate) && (
             <p className="text-sm text-gray-600">
               <strong>Due:</strong> {agentResult.dueDate}
             </p>
@@ -82,6 +127,8 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
             task={agentResult.task}
             dueDate={agentResult.dueDate}
             priority={agentResult.priority}
+            emailId={params.id}
+            accessToken={session.accessToken}
           />
         </div>
       </div>
