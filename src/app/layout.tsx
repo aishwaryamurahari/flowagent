@@ -1,6 +1,8 @@
 import "./globals.css";
 import { Providers } from "./providers";
 import { NavLinks } from "./components/NavLinks";
+import TopBarUser from "./components/TopBarUser";
+import Image from "next/image";
 
 export const metadata = {
   title: "FlowAgent",
@@ -12,15 +14,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="bg-gradient-to-br from-gray-50 via-white to-indigo-50 text-gray-900 min-h-screen font-sans">
         <Providers>
-          <header className="sticky top-0 z-30 p-4 border-b shadow-sm bg-white/80 backdrop-blur-md">
-            <div className="max-w-5xl mx-auto flex justify-between items-center">
-              <div className="flex items-center space-x-2">
-                <span className="inline-block w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold text-lg">F</span>
-                <h1 className="text-2xl font-bold text-indigo-700 tracking-tight">FlowAgent</h1>
+          {/* Top Bar: logo left, welcome+signout right */}
+          <div className="w-full flex items-center justify-between py-2 px-8 bg-white/95 border-b border-indigo-50 shadow-sm">
+            <div className="flex items-center gap-2">
+              <div className="flex flex-col items-center justify-center">
+                <Image src="/flowagent-logo.png" alt="FlowAgent Logo" width={60} height={60} />
               </div>
+            </div>
+            <TopBarUser />
+          </div>
+
+          {/* Navigation Tabs: centered, pill style */}
+          <div className="w-full flex justify-center bg-transparent py-4">
+            <div className="bg-white rounded-full shadow px-4 py-1 flex gap-2 border border-indigo-100">
               <NavLinks />
             </div>
-          </header>
+          </div>
+
           <main className="max-w-5xl mx-auto p-6 min-h-[calc(100vh-80px)]">{children}</main>
         </Providers>
       </body>

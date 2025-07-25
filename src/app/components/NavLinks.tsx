@@ -9,27 +9,15 @@ export function NavLinks() {
     { href: "/inbox", label: "Inbox" },
   ];
   return (
-    <nav className="flex gap-3 text-base font-medium text-indigo-700">
+    <nav className="flex gap-2 text-base font-medium">
       {links.map((link) => {
         const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
         return (
           <a
             key={link.href}
             href={link.href}
-            className={`nav-link ${isActive ? 'active' : ''}`}
-            style={{
-              padding: '0.5rem 1rem',
-              borderRadius: '0.5rem',
-              transition: 'all 0.15s ease-in-out',
-              ...(isActive ? {
-                backgroundColor: '#4f46e5',
-                color: 'white',
-                fontWeight: 'bold',
-                boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
-              } : {
-                color: '#4f46e5'
-              })
-            }}
+            className={`px-5 py-2 rounded-full transition font-semibold ${isActive ? 'bg-indigo-600 text-white shadow' : 'text-indigo-700 hover:bg-indigo-50'}`}
+            style={{ minWidth: '80px', textAlign: 'center' }}
           >
             {link.label}
           </a>
