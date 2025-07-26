@@ -2,7 +2,7 @@
 import { useTheme } from "@/hooks/useTheme";
 
 export default function ThemeToggle() {
-  const { theme, setTheme, mounted } = useTheme();
+  const { theme, setTheme, mounted, forceUpdate } = useTheme();
 
   if (!mounted) return null;
 
@@ -50,8 +50,18 @@ export default function ThemeToggle() {
       localStorage.setItem("theme", "light");
     }
 
-    // Update the state
+    // Update the state immediately
     setTheme(nextTheme);
+
+    // Dispatch a custom event to notify all components
+    window.dispatchEvent(new CustomEvent('themeChange', {
+      detail: { theme: nextTheme }
+    }));
+
+    // Force a re-render
+    setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 0);
   };
 
   return (

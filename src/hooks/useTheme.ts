@@ -1,10 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 type Theme = "light" | "dark";
 
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>("light");
   const [mounted, setMounted] = useState(false);
+  const [forceUpdate, setForceUpdate] = useState(0);
+
+  // Force a re-render when theme changes
+  const forceReRender = useCallback(() => {
+    setForceUpdate(prev => prev + 1);
+  }, []);
 
   // On mount, check localStorage for saved theme and sync with DOM
   useEffect(() => {
@@ -49,7 +55,43 @@ export function useTheme() {
       root.style.colorScheme = "light";
       localStorage.setItem("theme", "light");
     }
-  }, [theme, mounted]);
 
-  return { theme, setTheme, mounted };
+    // Force a re-render after theme change
+    forceReRender();
+  }, [theme, mounted, forceReRender]);
+
+  // Listen for theme changes from other components
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark" || saved === "light") {
+        setTheme(saved);
+      }
+    };
+
+    const handleClassChange = () => {
+      const hasDarkClass = document.documentElement.classList.contains("dark");
+      const currentTheme = hasDarkClass ? "dark" : "light";
+      if (currentTheme !== theme) {
+        setTheme(currentTheme);
+      }
+    };
+
+    // Listen for localStorage changes
+    window.addEventListener("storage", handleStorageChange);
+
+    // Listen for class changes on the HTML element
+    const observer = new MutationObserver(handleClassChange);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      observer.disconnect();
+    };
+  }, [theme]);
+
+  return { theme, setTheme, mounted, forceUpdate };
 }
