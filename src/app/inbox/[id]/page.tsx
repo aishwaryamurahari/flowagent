@@ -9,7 +9,7 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
   const session = await getServerSession(authOptions);
 
   if (!session?.accessToken) {
-    return <p className="text-red-600">You must be signed in.</p>;
+    return <p className="text-red-600 dark:text-red-400">You must be signed in.</p>;
   }
 
   // fetchEmailBody now returns { summary, jobLinks }
@@ -24,7 +24,7 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
     return paragraphs.map((paragraph, index) => (
       <p
         key={index}
-        className="mb-4 leading-relaxed"
+        className="mb-4 leading-relaxed text-gray-900 dark:text-gray-100"
         style={{
           marginBottom: '16px',
           lineHeight: '1.6'
@@ -41,11 +41,10 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <h2 className="text-3xl font-bold text-indigo-700 text-center">Email to Task</h2>
-
+    <div className="max-w-4xl mx-auto p-6 space-y-6">
+      {/* Email Content */}
       <div
-        className="bg-white/90 p-6 border border-gray-200 rounded-xl shadow-md"
+        className="bg-white/90 dark:bg-gray-900/90 p-6 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md"
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.9)',
           padding: '24px',
@@ -54,43 +53,15 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         }}
       >
-        <h3 className="font-semibold mb-4 text-lg text-indigo-700">📧 Email Content</h3>
-        <div
-          className="text-sm leading-relaxed"
-          style={{
-            fontSize: '14px',
-            lineHeight: '1.6',
-            wordWrap: 'break-word',
-            overflowWrap: 'break-word'
-          }}
-        >
-          {/* Show the summary as before */}
+        <h3 className="font-semibold mb-4 text-lg text-indigo-700 dark:text-indigo-300">📧 Original Email</h3>
+        <div className="space-y-4 text-gray-900 dark:text-gray-100">
           {formatEmailContent(emailBodyResult.summary)}
-          {/* Show clickable job links if present */}
-          {emailBodyResult.jobLinks && emailBodyResult.jobLinks.length > 0 && (
-            <div className="mt-4">
-              <h4 className="font-semibold mb-2 text-indigo-600">Job Links:</h4>
-              <ul className="list-disc pl-6">
-                {emailBodyResult.jobLinks.map((job, idx) => (
-                  <li key={idx} className="mb-2">
-                    <a
-                      href={job.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline hover:text-blue-800"
-                    >
-                      {job.title}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
 
+      {/* Agent Task Summary */}
       <div
-        className="bg-white/90 p-6 border border-gray-200 rounded-xl shadow-md"
+        className="bg-white/90 dark:bg-gray-900/90 p-6 border border-gray-200 dark:border-gray-700 rounded-xl shadow-md"
         style={{
           backgroundColor: 'rgba(255, 255, 255, 0.9)',
           padding: '24px',
@@ -99,10 +70,10 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         }}
       >
-        <h3 className="font-semibold mb-4 text-lg text-indigo-700">🧠 Agent Task Summary</h3>
+        <h3 className="font-semibold mb-4 text-lg text-indigo-700 dark:text-indigo-300">🧠 Agent Task Summary</h3>
         <div className="space-y-3">
           <p
-            className="text-base leading-relaxed"
+            className="text-base leading-relaxed text-gray-900 dark:text-gray-100"
             style={{
               fontSize: '16px',
               lineHeight: '1.6'
@@ -111,12 +82,12 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
             {agentResult.task}
           </p>
           {shouldShowDueDate(agentResult.dueDate) && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               <strong>Due:</strong> {agentResult.dueDate}
             </p>
           )}
           {agentResult.priority && (
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               <strong>Priority:</strong> {agentResult.priority}
             </p>
           )}
