@@ -7,14 +7,47 @@ import { useTheme } from "@/hooks/useTheme";
 import { useEffect, useState } from "react";
 
 export default function LandingPage() {
-  const { theme, mounted } = useTheme();
+  const { theme, mounted, forceUpdate } = useTheme();
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     // Check if HTML has dark class
     const hasDarkClass = document.documentElement.classList.contains('dark');
     setIsDarkMode(hasDarkClass);
-  }, [theme]);
+  }, [theme, forceUpdate]);
+
+  // Listen for theme change events
+  useEffect(() => {
+    const handleThemeChange = () => {
+      const hasDarkClass = document.documentElement.classList.contains('dark');
+      setIsDarkMode(hasDarkClass);
+    };
+
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem("theme");
+      const hasDarkClass = document.documentElement.classList.contains('dark');
+      setIsDarkMode(hasDarkClass);
+    };
+
+    // Listen for custom theme change events
+    window.addEventListener('themeChange', handleThemeChange);
+
+    // Listen for localStorage changes
+    window.addEventListener('storage', handleStorageChange);
+
+    // Listen for class changes on the HTML element
+    const observer = new MutationObserver(handleThemeChange);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+
+    return () => {
+      window.removeEventListener('themeChange', handleThemeChange);
+      window.removeEventListener('storage', handleStorageChange);
+      observer.disconnect();
+    };
+  }, []);
 
   if (!mounted) {
     return (
@@ -72,7 +105,7 @@ export default function LandingPage() {
             >
               AI-Powered Email Summarization
             </h3>
-            <p style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+            <p style={{ color: isDark ? '#e5e7eb' : '#374151' }}>
               Let FlowAgent read and summarize your emails, extracting the most important tasks and information automatically.
             </p>
           </div>
@@ -91,7 +124,7 @@ export default function LandingPage() {
             >
               Auto Task Creation in Notion
             </h3>
-            <p style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+            <p style={{ color: isDark ? '#e5e7eb' : '#374151' }}>
               Tasks are instantly created in your Notion workspace, keeping your workflow organized and up-to-date.
             </p>
           </div>
@@ -110,7 +143,7 @@ export default function LandingPage() {
             >
               Smart Gmail Labeling
             </h3>
-            <p style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+            <p style={{ color: isDark ? '#e5e7eb' : '#374151' }}>
               Processed emails are automatically labeled in Gmail, so you always know what's been handled.
             </p>
           </div>
@@ -135,7 +168,7 @@ export default function LandingPage() {
             >
               Sign in
             </h4>
-            <p style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+            <p style={{ color: isDark ? '#e5e7eb' : '#374151' }}>
               Connect your Google account securely to get started.
             </p>
           </div>
@@ -148,7 +181,7 @@ export default function LandingPage() {
             >
               Review Emails
             </h4>
-            <p style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+            <p style={{ color: isDark ? '#e5e7eb' : '#374151' }}>
               FlowAgent summarizes and highlights tasks from your inbox.
             </p>
           </div>
@@ -161,7 +194,7 @@ export default function LandingPage() {
             >
               Push to Notion
             </h4>
-            <p style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+            <p style={{ color: isDark ? '#e5e7eb' : '#374151' }}>
               Send tasks to Notion with one click and stay organized.
             </p>
           </div>
