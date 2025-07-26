@@ -20,7 +20,7 @@ export function NavLinks() {
             className={`px-5 py-2 rounded-full transition font-semibold ${
               isActive
                 ? 'bg-indigo-600 text-white shadow'
-                : 'text-indigo-700 dark:text-indigo-300 hover:bg-indigo-50 dark:hover:bg-indigo-900/50'
+                : 'text-gray-900 dark:text-indigo-300 hover:bg-gray-100 dark:hover:bg-indigo-900/50'
             }`}
             style={{ minWidth: '80px', textAlign: 'center' }}
           >

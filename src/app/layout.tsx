@@ -12,6 +12,56 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  // Immediately remove any existing dark class
+                  document.documentElement.classList.remove('dark');
+
+                  // Get saved theme
+                  var theme = localStorage.getItem('theme');
+
+                  // Apply theme - default to light if not set
+                  if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    // Ensure light mode and save it
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                  }
+
+                  // Force color scheme to match our theme
+                  if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.style.colorScheme = 'dark';
+                  } else {
+                    document.documentElement.style.colorScheme = 'light';
+                  }
+                } catch (e) {
+                  // Fallback: ensure light mode
+                  document.documentElement.classList.remove('dark');
+                  document.documentElement.style.colorScheme = 'light';
+                }
+              })();
+            `,
+          }}
+        />
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              /* Prevent system dark mode from interfering */
+              html:not(.dark) {
+                color-scheme: light !important;
+              }
+              html.dark {
+                color-scheme: dark !important;
+              }
+            `,
+          }}
+        />
+      </head>
       <body className="bg-gradient-to-br from-gray-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-950 dark:to-indigo-900 dark:text-gray-100 text-gray-900 min-h-screen font-sans">
         <Providers>
           {/* Top Bar: logo left, welcome+signout right */}
