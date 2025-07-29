@@ -60,8 +60,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ message: 'Task created in Notion' });
-  } catch (err) {
-    console.error('Error pushing to Notion:', err);
+  } catch (error) {
+    console.error('Error pushing to Notion:', error);
     return NextResponse.json({ error: 'Failed to push to Notion' }, { status: 500 });
   }
 }

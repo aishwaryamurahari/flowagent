@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
-import { NavLinks } from "./components/NavLinks";
-import TopBarUser from "./components/TopBarUser";
+
 import HeroCard from "./components/HeroCard";
 import { useTheme } from "@/hooks/useTheme";
 import { useEffect, useState } from "react";
@@ -24,7 +23,6 @@ export default function LandingPage() {
     };
 
     const handleStorageChange = () => {
-      const saved = localStorage.getItem("theme");
       const hasDarkClass = document.documentElement.classList.contains('dark');
       setIsDarkMode(hasDarkClass);
     };
