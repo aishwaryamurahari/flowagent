@@ -33,7 +33,7 @@ export async function createNotionTask({
 
   const response = await notion.pages.create({
     parent: { database_id: databaseId },
-    properties: properties as any,
+    properties: properties as never,
   });
 
   return response;

@@ -1,5 +1,5 @@
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { fetchEmailBody } from "@/lib/gmail";
 import { runAgent } from "@/lib/agent";
 import PushToNotionButtonWrapper from "./PushToNotionButtonWrapper";

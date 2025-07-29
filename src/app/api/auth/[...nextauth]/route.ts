@@ -1,35 +1,6 @@
 // app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth/next";
-import GoogleProvider from "next-auth/providers/google";
-
-export const authOptions = {
-  providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      authorization: {
-        params: {
-          scope:
-            "openid email profile https://www.googleapis.com/auth/gmail.modify",
-        },
-      },
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, account }: { token: any; account: any }) {
-      if (account) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-      }
-      return token;
-    },
-    async session({ session, token }: { session: any; token: any }) {
-      session.accessToken = token.accessToken as string | undefined;
-      session.refreshToken = token.refreshToken as string | undefined;
-      return session;
-    },
-  },
-};
+import { authOptions } from "@/lib/auth";
 
 const handler = NextAuth(authOptions);
 
