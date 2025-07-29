@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { fetchEmails } from "@/lib/gmail";
 import Link from "next/link";
@@ -6,7 +6,7 @@ import Link from "next/link";
 export default async function InboxPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !session.accessToken) {
+  if (!session || !(session as any).accessToken) {
     return (
       <div className="text-center mt-10">
         <p className="text-lg text-red-600 dark:text-red-400">Please sign in to view emails.</p>
@@ -14,7 +14,7 @@ export default async function InboxPage() {
     );
   }
 
-  const emails = await fetchEmails(session.accessToken);
+  const emails = await fetchEmails((session as any).accessToken);
 
   return (
     <div className="mt-8">

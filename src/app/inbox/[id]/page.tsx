@@ -1,4 +1,4 @@
-import { getServerSession } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { fetchEmailBody } from "@/lib/gmail";
 import { runAgent } from "@/lib/agent";
@@ -8,31 +8,50 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
   const params = await paramsPromise;
   const session = await getServerSession(authOptions);
 
-  if (!session?.accessToken) {
+  if (!(session as any)?.accessToken) {
     return <p className="text-red-600 dark:text-red-400">You must be signed in.</p>;
   }
 
   // fetchEmailBody now returns { summary, jobLinks }
-  const emailBodyResult = await fetchEmailBody(session.accessToken, params.id);
+  const emailBodyResult = await fetchEmailBody((session as any).accessToken, params.id);
   const agentResult = await runAgent(emailBodyResult.summary);
 
   // Format the email content for better readability
   const formatEmailContent = (content: string) => {
     if (!content) return content;
+
+    // Clean up the content by removing excessive whitespace and formatting
+    let cleanedContent = content
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .replace(/\n\s*\n/g, '\n\n') // Clean up line breaks
+      .trim();
+
     // Split into paragraphs and format
-    const paragraphs = content.split('\n\n').filter(p => p.trim().length > 0);
-    return paragraphs.map((paragraph, index) => (
-      <p
-        key={index}
-        className="mb-4 leading-relaxed text-gray-900 dark:text-gray-100"
-        style={{
-          marginBottom: '16px',
-          lineHeight: '1.6'
-        }}
-      >
-        {paragraph.trim()}
-      </p>
-    ));
+    const paragraphs = cleanedContent.split('\n\n').filter(p => p.trim().length > 0);
+
+    return paragraphs.map((paragraph, index) => {
+      const trimmedParagraph = paragraph.trim();
+
+      // Skip very long URLs or encoded strings
+      if (trimmedParagraph.length > 200 && trimmedParagraph.includes('http')) {
+        return null;
+      }
+
+      return (
+        <p
+          key={index}
+          className="mb-4 leading-relaxed text-gray-900 dark:text-gray-100 break-words"
+          style={{
+            marginBottom: '16px',
+            lineHeight: '1.6',
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word'
+          }}
+        >
+          {trimmedParagraph}
+        </p>
+      );
+    }).filter(Boolean); // Remove null elements
   };
 
   // Helper function to check if due date should be displayed
@@ -54,8 +73,10 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
         }}
       >
         <h3 className="font-semibold mb-4 text-lg text-indigo-700 dark:text-indigo-300">📧 Original Email</h3>
-        <div className="space-y-4 text-gray-900 dark:text-gray-100">
-          {formatEmailContent(emailBodyResult.summary)}
+        <div className="space-y-4 text-gray-900 dark:text-gray-100 max-w-full">
+          <div className="prose prose-sm max-w-none">
+            {formatEmailContent(emailBodyResult.summary)}
+          </div>
         </div>
       </div>
 
@@ -99,7 +120,7 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
             dueDate={agentResult.dueDate}
             priority={agentResult.priority}
             emailId={params.id}
-            accessToken={session.accessToken}
+            accessToken={(session as any).accessToken}
           />
         </div>
       </div>

@@ -13,7 +13,7 @@ export async function createNotionTask({
   priority?: string;
 }) {
   const databaseId = process.env.NOTION_DATABASE_ID!;
-  const properties: Record<string, any> = {
+  const properties: Record<string, unknown> = {
     Name: {
       title: [{ text: { content: title } }],
     },
@@ -33,7 +33,7 @@ export async function createNotionTask({
 
   const response = await notion.pages.create({
     parent: { database_id: databaseId },
-    properties,
+    properties: properties as any,
   });
 
   return response;

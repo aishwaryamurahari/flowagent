@@ -1,8 +1,8 @@
 // app/api/auth/[...nextauth]/route.ts
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -16,14 +16,14 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
+    async jwt({ token, account }: any) {
       if (account) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token }: any) {
       session.accessToken = token.accessToken as string | undefined;
       session.refreshToken = token.refreshToken as string | undefined;
       return session;
