@@ -144,7 +144,7 @@ export default function LandingPage() {
               Smart Gmail Labeling
             </h3>
             <p style={{ color: isDark ? '#e5e7eb' : '#374151' }}>
-              Processed emails are automatically labeled in Gmail, so you always know what's been handled.
+              Processed emails are automatically labeled in Gmail, so you always know what&apos;s been handled.
             </p>
           </div>
         </div>
