@@ -38,7 +38,7 @@ Email:
   try {
     const json = JSON.parse(cleaned);
     return json;
-  } catch (err) {
+  } catch (error) {
     return { task: "⚠️ Failed to parse agent output.", dueDate: "", priority: "" };
   }
 }

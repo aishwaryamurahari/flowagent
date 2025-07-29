@@ -2,7 +2,7 @@
 import { useTheme } from "@/hooks/useTheme";
 
 export default function ThemeToggle() {
-  const { theme, setTheme, mounted, forceUpdate } = useTheme();
+  const { theme, setTheme, mounted } = useTheme();
 
   if (!mounted) return null;
 

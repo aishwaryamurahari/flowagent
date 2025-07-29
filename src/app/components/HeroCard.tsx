@@ -21,7 +21,6 @@ export default function HeroCard() {
     };
 
     const handleStorageChange = () => {
-      const saved = localStorage.getItem("theme");
       const hasDarkClass = document.documentElement.classList.contains('dark');
       setIsDarkMode(hasDarkClass);
     };

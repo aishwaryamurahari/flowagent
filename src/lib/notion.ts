@@ -13,7 +13,7 @@ export async function createNotionTask({
   priority?: string;
 }) {
   const databaseId = process.env.NOTION_DATABASE_ID!;
-  const properties: any = {
+  const properties: Record<string, any> = {
     Name: {
       title: [{ text: { content: title } }],
     },
