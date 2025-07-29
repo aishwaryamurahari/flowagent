@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
         if (!isNaN(date.getTime())) {
           parsedDueDate = { start: date.toISOString() };
         }
-      } catch (error) {
+      } catch {
         console.warn('Invalid dueDate format:', dueDate);
       }
     }
