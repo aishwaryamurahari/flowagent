@@ -6,7 +6,7 @@ import Link from "next/link";
 export default async function InboxPage() {
   const session = await getServerSession(authOptions);
 
-  if (!session || !(session as any).accessToken) {
+  if (!session || !(session as { accessToken?: string }).accessToken) {
     return (
       <div className="text-center mt-10">
         <p className="text-lg text-red-600 dark:text-red-400">Please sign in to view emails.</p>
@@ -14,7 +14,7 @@ export default async function InboxPage() {
     );
   }
 
-  const emails = await fetchEmails((session as any).accessToken);
+  const emails = await fetchEmails((session as { accessToken?: string }).accessToken!);
 
   return (
     <div className="mt-8">

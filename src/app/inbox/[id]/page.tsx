@@ -8,12 +8,12 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
   const params = await paramsPromise;
   const session = await getServerSession(authOptions);
 
-  if (!(session as any)?.accessToken) {
+  if (!(session as { accessToken?: string })?.accessToken) {
     return <p className="text-red-600 dark:text-red-400">You must be signed in.</p>;
   }
 
   // fetchEmailBody now returns { summary, jobLinks }
-  const emailBodyResult = await fetchEmailBody((session as any).accessToken, params.id);
+  const emailBodyResult = await fetchEmailBody((session as { accessToken?: string }).accessToken!, params.id);
   const agentResult = await runAgent(emailBodyResult.summary);
 
   // Format the email content for better readability
@@ -21,7 +21,7 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
     if (!content) return content;
 
     // Clean up the content by removing excessive whitespace and formatting
-    let cleanedContent = content
+    const cleanedContent = content
       .replace(/\s+/g, ' ') // Replace multiple spaces with single space
       .replace(/\n\s*\n/g, '\n\n') // Clean up line breaks
       .trim();
@@ -120,7 +120,7 @@ export default async function EmailDetailPage({ params: paramsPromise }: { param
             dueDate={agentResult.dueDate}
             priority={agentResult.priority}
             emailId={params.id}
-            accessToken={(session as any).accessToken}
+            accessToken={(session as { accessToken?: string }).accessToken!}
           />
         </div>
       </div>
