@@ -193,114 +193,189 @@ export async function markEmailAsProcessed(accessToken: string, emailId: string)
   }
 }
 
-export async function fetchEmails(accessToken: string) {
+// Test function to verify Gmail API access
+export async function testGmailAccess(accessToken: string) {
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
 
   const gmail = google.gmail({ version: "v1", auth });
 
-  // Get the label ID for 'Processed'
-  const labelsResponse = await gmail.users.labels.list({ userId: "me" });
-  const processedLabel = labelsResponse.data.labels?.find(label => label.name === "Processed");
-  const processedLabelId = processedLabel?.id;
-  console.log('Processed labelId:', processedLabelId);
+  try {
+    // Test basic Gmail API access
+    const profile = await gmail.users.getProfile({ userId: "me" });
+    console.log('Gmail API test successful:', profile.data);
+    return { success: true, profile: profile.data };
+  } catch (error) {
+    console.error('Gmail API test failed:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
 
-  // Fetch more emails initially to account for processed ones
-  const res = await gmail.users.messages.list({
-    userId: "me",
-    maxResults: 10, // Fetch more emails initially
-  });
+export async function fetchEmails(accessToken: string) {
 
-  const messages = res.data.messages ?? [];
+  const auth = new google.auth.OAuth2();
+  auth.setCredentials({ access_token: accessToken });
 
-  // Fetch message details (like subject)
-  const messageDetails = await Promise.all(
-    messages.map(async (msg) => {
-      const message = await gmail.users.messages.get({
-        userId: "me",
-        id: msg.id!,
-        format: "metadata",
-        metadataHeaders: ["Subject", "From", "Date"],
-      });
+  const gmail = google.gmail({ version: "v1", auth });
 
-      const headers = message.data.payload?.headers ?? [];
-      const labelIds = message.data.labelIds || [];
-      const isUnread = labelIds.includes('UNREAD');
-      // FIX: Check for processedLabelId, not 'Processed'
-      const isProcessed = processedLabelId ? labelIds.includes(processedLabelId) : false;
+  try {
+    // Get the label ID for 'Processed'
+    const labelsResponse = await gmail.users.labels.list({ userId: "me" });
+    const processedLabel = labelsResponse.data.labels?.find(label => label.name === "Processed");
+    const processedLabelId = processedLabel?.id;
+    console.log('Processed labelId:', processedLabelId);
 
-      // Debug log: print out the labelIds for each email
-      console.log(`Email ID: ${msg.id}, Subject: ${headers.find((h) => h.name === "Subject")?.value}, labelIds:`, labelIds, '| isProcessed:', isProcessed);
-      if (isProcessed) {
-        console.log(`Email ID: ${msg.id} is marked as Processed (labelId: ${processedLabelId}) and will be filtered out.`);
-      }
+    // Fetch more emails initially to account for processed ones
+    const res = await gmail.users.messages.list({
+      userId: "me",
+      maxResults: 10, // Fetch more emails initially
+    });
 
-      const getHeader = (name: string) =>
-        headers.find((h) => h.name === name)?.value ?? "";
+    console.log('fetchEmails: Gmail API response received, messages count:', res.data.messages?.length || 0);
 
-      return {
-        id: msg.id,
-        subject: getHeader("Subject"),
-        from: getHeader("From"),
-        date: getHeader("Date"),
-        isUnread: isUnread,
-        isProcessed: isProcessed,
-      };
-    })
-  );
+    const messages = res.data.messages ?? [];
 
-  // Filter out processed emails and return only the first 5 unprocessed emails
-  const unprocessedEmails = messageDetails
-    .filter(email => !email.isProcessed)
-    .slice(0, 5);
+    // Fetch message details (like subject)
+    const messageDetails = await Promise.all(
+      messages.map(async (msg) => {
+        try {
+          const message = await gmail.users.messages.get({
+            userId: "me",
+            id: msg.id!,
+            format: "metadata",
+            metadataHeaders: ["Subject", "From", "Date"],
+          });
 
-  // Debug log: print out the IDs of emails being returned
-  console.log('Returning unprocessed email IDs:', unprocessedEmails.map(e => e.id));
+          const headers = message.data.payload?.headers ?? [];
+          const labelIds = message.data.labelIds || [];
+          const isUnread = labelIds.includes('UNREAD');
+          // FIX: Check for processedLabelId, not 'Processed'
+          const isProcessed = processedLabelId ? labelIds.includes(processedLabelId) : false;
 
-  return unprocessedEmails;
+          // Debug log: print out the labelIds for each email
+          console.log(`Email ID: ${msg.id}, Subject: ${headers.find((h) => h.name === "Subject")?.value}, labelIds:`, labelIds, '| isProcessed:', isProcessed);
+          if (isProcessed) {
+            console.log(`Email ID: ${msg.id} is marked as Processed (labelId: ${processedLabelId}) and will be filtered out.`);
+          }
+
+          const getHeader = (name: string) =>
+            headers.find((h) => h.name === name)?.value ?? "";
+
+          return {
+            id: msg.id,
+            subject: getHeader("Subject"),
+            from: getHeader("From"),
+            date: getHeader("Date"),
+            isUnread: isUnread,
+            isProcessed: isProcessed,
+          };
+        } catch (error) {
+          console.error(`Error fetching details for email ${msg.id}:`, error);
+          return null;
+        }
+      })
+    );
+
+    // Filter out null results and processed emails
+    const validEmails = messageDetails.filter(email => email !== null);
+    const unprocessedEmails = validEmails
+      .filter(email => !email!.isProcessed)
+      .slice(0, 5);
+
+    // Debug log: print out the IDs of emails being returned
+    console.log('Returning unprocessed email IDs:', unprocessedEmails.map(e => e!.id));
+
+    return unprocessedEmails;
+  } catch (error) {
+    console.error('Error fetching emails:', error);
+    return [];
+  }
 }
 
 // In fetchEmailBody, extract job links and return them along with the summary
 export async function fetchEmailBody(accessToken: string, messageId: string) {
+  console.log('fetchEmailBody: Starting with messageId:', messageId);
+
   const auth = new google.auth.OAuth2();
   auth.setCredentials({ access_token: accessToken });
 
   const gmail = google.gmail({ version: "v1", auth });
 
-  const message = await gmail.users.messages.get({
-    userId: "me",
-    id: messageId,
-    format: "full",
-  });
+  try {
+    console.log('fetchEmailBody: Making Gmail API call for message:', messageId);
 
-  const parts = message.data.payload?.parts;
+    const message = await gmail.users.messages.get({
+      userId: "me",
+      id: messageId,
+      format: "full",
+    });
 
-  const plainPart = parts?.find((part) => part.mimeType === "text/plain");
-  const htmlPart = parts?.find((part) => part.mimeType === "text/html");
+    console.log('fetchEmailBody: Gmail API response received, payload exists:', !!message.data.payload);
 
-  let raw = "";
+    if (!message.data.payload) {
+      throw new Error("No payload found in email message");
+    }
 
-  if (plainPart?.body?.data) {
-    raw = Buffer.from(plainPart.body.data, "base64").toString("utf-8");
-  } else if (htmlPart?.body?.data) {
-    raw = Buffer.from(htmlPart.body.data, "base64").toString("utf-8");
-    raw = htmlToText(raw); // convert html to readable text
+    const parts = message.data.payload?.parts;
+
+    const plainPart = parts?.find((part) => part.mimeType === "text/plain");
+    const htmlPart = parts?.find((part) => part.mimeType === "text/html");
+
+    let raw = "";
+
+    if (plainPart?.body?.data) {
+      raw = Buffer.from(plainPart.body.data, "base64").toString("utf-8");
+    } else if (htmlPart?.body?.data) {
+      raw = Buffer.from(htmlPart.body.data, "base64").toString("utf-8");
+      raw = htmlToText(raw); // convert html to readable text
+    } else if (message.data.payload.body?.data) {
+      // Handle emails without parts (simple text emails)
+      raw = Buffer.from(message.data.payload.body.data, "base64").toString("utf-8");
+    } else {
+      throw new Error("No readable content found in email");
+    }
+
+    console.log('fetchEmailBody: Raw content length:', raw.length);
+
+    const cleanedContent = cleanEmailContent(raw);
+
+    // Create a structured summary instead of raw content
+    const summary = createEmailSummary(cleanedContent);
+
+    const jobLinks = extractJobLinks(cleanedContent);
+
+    // Return both summary and jobLinks
+    return { summary, jobLinks };
+  } catch (error) {
+    console.error('Error fetching email body:', error);
+    console.error('Error details:', {
+      messageId,
+      hasAccessToken: !!accessToken,
+      errorMessage: error instanceof Error ? error.message : 'Unknown error',
+      errorStack: error instanceof Error ? error.stack : undefined
+    });
+
+    // Handle specific Gmail API errors
+    let errorMessage = "Error: Unable to load email content. Please try again later.";
+
+    if (error instanceof Error) {
+      if (error.message.includes('403')) {
+        errorMessage = "Error: Insufficient permissions to access this email. Please check your Gmail API permissions.";
+      } else if (error.message.includes('404')) {
+        errorMessage = "Error: Email not found. It may have been deleted or moved.";
+      } else if (error.message.includes('429')) {
+        errorMessage = "Error: Gmail API rate limit exceeded. Please try again in a few minutes.";
+      } else if (error.message.includes('500') || error.message.includes('502') || error.message.includes('503')) {
+        errorMessage = "Error: Gmail API is temporarily unavailable. Please try again later.";
+      } else if (error.message.includes('401')) {
+        errorMessage = "Error: Authentication failed. Please sign in again.";
+      }
+    }
+
+    // Return a default response instead of throwing
+    return {
+      summary: errorMessage,
+      jobLinks: []
+    };
   }
-
-  // Clean the content before summarizing
-  const cleanedContent = cleanEmailContent(raw);
-  // Debug log: print the cleaned content
-  console.log('fetchEmailBody: cleaned content:', cleanedContent);
-
-  // Create a structured summary instead of raw content
-  const summary = createEmailSummary(cleanedContent);
-  // Debug log: print the summary
-  console.log('fetchEmailBody: summary:', summary);
-
-  // Extract job links
-  const jobLinks = extractJobLinks(cleanedContent);
-  console.log('fetchEmailBody: jobLinks:', jobLinks);
-
-  // Return both summary and jobLinks
-  return { summary, jobLinks };
 }
