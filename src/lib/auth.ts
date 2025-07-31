@@ -16,36 +16,36 @@ declare module "next-auth/jwt" {
   }
 }
 
-// Validate required environment variables
-const requiredEnvVars = {
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-};
-
-// Check for missing environment variables
-const missingVars = Object.entries(requiredEnvVars)
-  .filter(([, value]) => !value)
-  .map(([key]) => key);
-
-if (missingVars.length > 0) {
-  console.error('Missing required environment variables:', missingVars);
-  throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
-}
-
 console.log("=== ENV VAR CHECK (lib/auth.ts) ===");
-console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
-console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID ? "SET" : "MISSING");
+console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET ? "SET" : "MISSING");
+console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET ? "SET" : "MISSING");
 console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 
+// Only validate in production to avoid build-time errors
+if (process.env.NODE_ENV === 'production') {
+  const requiredEnvVars = {
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+  };
+
+  const missingVars = Object.entries(requiredEnvVars)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
+
+  if (missingVars.length > 0) {
+    console.error('Missing required environment variables:', missingVars);
+    // Don't throw error, just log it
+  }
+}
 
 export const authOptions = {
   providers: [
     GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID! || "MISSING_ID",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET! || "MISSING_SECRET",
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
         params: {
           scope:
