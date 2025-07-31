@@ -5,9 +5,7 @@ const nextConfig: NextConfig = {
   output: 'standalone',
 
   // Ensure API routes are properly handled
-  experimental: {
-    serverComponentsExternalPackages: [],
-  },
+  serverExternalPackages: [],
 
   // Configure for Amplify deployment
   trailingSlash: false,
