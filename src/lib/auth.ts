@@ -16,6 +16,24 @@ declare module "next-auth/jwt" {
   }
 }
 
+// Validate required environment variables
+const requiredEnvVars = {
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+  NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+  NEXTAUTH_URL: process.env.NEXTAUTH_URL,
+};
+
+// Check for missing environment variables
+const missingVars = Object.entries(requiredEnvVars)
+  .filter(([key, value]) => !value)
+  .map(([key]) => key);
+
+if (missingVars.length > 0) {
+  console.error('Missing required environment variables:', missingVars);
+  throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+}
+
 export const authOptions = {
   providers: [
     GoogleProvider({
@@ -41,6 +59,18 @@ export const authOptions = {
       session.accessToken = token.accessToken;
       session.refreshToken = token.refreshToken;
       return session;
+    },
+  },
+  debug: process.env.NODE_ENV === 'development',
+  logger: {
+    error(code: any, ...message: any[]) {
+      console.error('NextAuth error:', code, ...message);
+    },
+    warn(code: any, ...message: any[]) {
+      console.warn('NextAuth warning:', code, ...message);
+    },
+    debug(code: any, ...message: any[]) {
+      console.log('NextAuth debug:', code, ...message);
     },
   },
 };
