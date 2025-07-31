@@ -1,21 +1,29 @@
-// app/api/auth/[...nextauth]/route.ts
 import NextAuth from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
-let handler: ReturnType<typeof NextAuth>;
+console.log("==== ENV VAR CHECK (NextAuth) ====");
+console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
+console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
+console.log("NEXTAUTH_SECRET:", process.env.NEXTAUTH_SECRET);
+console.log("NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
 
-try {
-  handler = NextAuth(authOptions);
-} catch (error) {
-  console.error('NextAuth initialization error:', error);
-  // Return a basic error handler if NextAuth fails to initialize
-  handler = async () => {
-    console.error('NextAuth handler error:', error);
-    return new Response(JSON.stringify({ error: 'Authentication service unavailable' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  };
+const handler = NextAuth(authOptions);
+
+export async function GET(req: Request) {
+  try {
+    return await handler(req);
+  } catch (error) {
+    console.error("NextAuth GET error:", error);
+    return NextResponse.json({ error: "Auth GET failed" }, { status: 500 });
+  }
 }
 
-export { handler as GET, handler as POST };
+export async function POST(req: Request) {
+  try {
+    return await handler(req);
+  } catch (error) {
+    console.error("NextAuth POST error:", error);
+    return NextResponse.json({ error: "Auth POST failed" }, { status: 500 });
+  }
+}
