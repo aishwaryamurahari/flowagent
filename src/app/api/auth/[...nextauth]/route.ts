@@ -2,14 +2,14 @@
 import NextAuth from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 
-let handler: any;
+let handler: ReturnType<typeof NextAuth>;
 
 try {
   handler = NextAuth(authOptions);
 } catch (error) {
   console.error('NextAuth initialization error:', error);
   // Return a basic error handler if NextAuth fails to initialize
-  handler = async (req: any, res: any) => {
+  handler = async () => {
     console.error('NextAuth handler error:', error);
     return new Response(JSON.stringify({ error: 'Authentication service unavailable' }), {
       status: 500,
