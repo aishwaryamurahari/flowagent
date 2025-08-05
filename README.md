@@ -11,6 +11,15 @@ FlowAgent is an autonomous assistant that converts your emails into actionable N
 - **Processed Email Tracking**: Emails that have been pushed to Notion are marked as processed and hidden from your inbox view.
 - **Modern UI**: Built with Next.js and Tailwind CSS for a fast, responsive experience.
 
+
+## 🎬 See it in action
+
+<div align="center">
+  <img src="./demo/flowagent.gif" alt="FlowAgent Demo" width="700"/>
+  <p><em>FlowAgent automatically converts emails into Notion tasks</em></p>
+</div>
+
+
 ## Tech Stack
 
 - [Next.js](https://nextjs.org/) (App Router)
@@ -75,3 +84,5 @@ Contributions are welcome! Please open an issue or submit a pull request.
 ## License
 
 [MIT](LICENSE)
+
+
