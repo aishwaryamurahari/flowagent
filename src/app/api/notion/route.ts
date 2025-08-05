@@ -11,6 +11,14 @@ export async function POST(req: NextRequest) {
   const { title, dueDate, priority, emailId, accessToken } = await req.json();
 
   try {
+    if (!process.env.NOTION_API_KEY) {
+      throw new Error('NOTION_API_KEY environment variable is not set');
+    }
+
+    if (!process.env.NOTION_DATABASE_ID) {
+      throw new Error('NOTION_DATABASE_ID environment variable is not set');
+    }
+
     // Validate and parse dueDate
     let parsedDueDate = null;
     if (dueDate && dueDate !== 'None' && dueDate !== 'null' && dueDate !== '') {
@@ -24,7 +32,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    await notion.pages.create({
+    const result = await notion.pages.create({
       parent: {
         database_id: process.env.NOTION_DATABASE_ID!,
       },
@@ -49,6 +57,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log('Notion page created successfully:', result.id);
+
     // Mark email as processed if emailId and accessToken are provided
     if (emailId && accessToken) {
       try {
@@ -61,7 +71,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ message: 'Task created in Notion' });
   } catch (error) {
-    console.error('Error pushing to Notion:', error);
-    return NextResponse.json({ error: 'Failed to push to Notion' }, { status: 500 });
+    console.error('Error pushing to Notion:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      title: title || 'Untitled Task',
+    });
+
+    // Return more specific error message
+    const errorMessage = error instanceof Error ? error.message : 'Failed to push to Notion';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
